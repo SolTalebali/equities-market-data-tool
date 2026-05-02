@@ -58,8 +58,8 @@ def build_clean_frame() -> pd.DataFrame:
             volume = int(rng.integers(5_000_000, 100_000_000))
             rows.append(
                 {
-                    "date": d.strftime("%Y-%m-%d"),
                     "ticker": ticker,
+                    "trade_date": d.strftime("%Y-%m-%d"),
                     "open": round(open_, 4),
                     "high": round(high, 4),
                     "low": round(low, 4),
@@ -97,7 +97,7 @@ def inject_bad_rows(df: pd.DataFrame) -> pd.DataFrame:
     # Invalid date format
     bad_date_formats = ["01/02/2024", "Jan 2 2024", "2024.03.15", "15-03-2024", "not-a-date"]
     for i in pick(5):
-        df.at[i, "date"] = rng.choice(bad_date_formats)
+        df.at[i, "trade_date"] = rng.choice(bad_date_formats)
 
     # Negative volume
     for i in pick(5):
