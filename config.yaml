@@ -1,0 +1,17 @@
+# Configuration for the equities market data pipeline.
+# Paths are relative to the project root.
+
+# Path to the raw input CSV consumed by the ingest stage.
+input_path: data/raw/market_prices.csv
+
+# Directory where cleaned, transformed output is written.
+output_path: data/processed/
+
+# Directory where rejected / invalid rows are written.
+error_path: data/errors/
+
+# File path for the pipeline's log output.
+log_path: logs/pipeline.log
+
+# Window size (in trading days) for the moving-average transform.
+moving_average_window: 5
