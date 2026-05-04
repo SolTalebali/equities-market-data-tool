@@ -27,4 +27,18 @@ def validate_schema(df: pd.DataFrame) -> pd.DataFrame:
 
 def split_valid_invalid(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Split a DataFrame into valid and invalid rows."""
-    pass
+    df = df.copy()
+    df["reason"] = ""
+    df.loc[df["volume"] < 0, "reason"] += "Negative volume; "
+    df.loc[df["high"] < df["low"], "reason"] += "High less than low; "
+    df.loc[df["high"] < df["open"], "reason"] += "High less than open; "
+    df.loc[df["high"] < df["close"], "reason"] += "High less than close; "
+    df.loc[df["low"] > df["open"], "reason"] += "Low greater than open; "
+    df.loc[df["low"] > df["close"], "reason"] += "Low greater than close; " 
+    df.loc[df[NUMERIC_COLUMNS].isna().any(axis=1), "reason"] += "Missing or non-numeric value; "
+    df.loc[(df[["open", "high", "low", "close", "volume"]] < 0).any(axis=1), "reason"] += "Negative price; "
+    df.loc[df["ticker"].isna(), "reason"] += "Missing ticker; "
+    df.loc[df["trade_date"].isna(), "reason"] += "Missing or invalid trade_date; "
+    valid_df = df[df["reason"] == ""].drop(columns="reason")
+    invalid_df = df[df["reason"] != ""]
+    return valid_df, invalid_df

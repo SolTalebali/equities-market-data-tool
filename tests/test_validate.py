@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from src.validate import validate_schema
+from src.validate import split_valid_invalid, validate_schema
 
 
 def test_validate_schema_with_correct_data_types():
@@ -30,4 +30,35 @@ def test_validate_schema_with_incorrect_data():
     })
     with pytest.raises(ValueError):
         validate_schema(df)
-       
+
+
+def test_split_valid_invalid_with_clean_data():
+    df = pd.DataFrame({
+        'ticker': ['AAPL'],
+        'trade_date': ['2024-01-01'],
+        'open': [150.0],
+        'high': [155.0],
+        'low': [149.0],
+        'close': [154.0],
+        'volume': [1000000]
+    })
+    valid_df, invalid_df = split_valid_invalid(df)
+    assert len(valid_df) == 1
+    assert len(invalid_df) == 0
+
+
+def test_split_valid_invalid_with_dirty_data():
+    df = pd.DataFrame({
+        'ticker': ['AAPL', 'GOOGL'],
+        'trade_date': ['2024-01-01', '2024-01-02'],
+        'open': [150.0, 2800.0],
+        'high': [155.0, 2700.0],  # Invalid: high < low for GOOGL
+        'low': [149.0, 2750.0],
+        'close': [154.0, 2820.0],
+        'volume': [1000000, -1500000]  # Invalid: negative volume for GOOGL
+    })
+    valid_df, invalid_df = split_valid_invalid(df)
+    assert len(valid_df) == 1
+    assert len(invalid_df) == 1
+    assert "High less than low" in invalid_df["reason"].iloc[0]
+    assert "Negative volume" in invalid_df["reason"].iloc[0]  
