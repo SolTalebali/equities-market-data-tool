@@ -5,18 +5,26 @@ statistics and writes processed/error datasets to disk.
 """
 
 import pandas as pd
+from pathlib import Path
 
 
 def summarize(df: pd.DataFrame) -> pd.DataFrame:
     """Generate a per-ticker summary DataFrame."""
-    pass
+    result = df.groupby('ticker').agg(
+        mean_daily_return=('daily_return', "mean"),
+        mean_spread=('spread', "mean"),
+        total_volume=('volume', "sum"),
+    ).reset_index()
+    return result
 
 
 def write_processed(df: pd.DataFrame, path: str) -> None:
     """Write the processed DataFrame to disk."""
-    pass
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False)
 
 
 def write_errors(df: pd.DataFrame, path: str) -> None:
     """Write rejected rows to the errors directory."""
-    pass
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False)
