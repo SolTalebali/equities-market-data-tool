@@ -41,6 +41,7 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
+Scratch*.ipynb
 
 # Data outputs (keep folders, ignore contents)
 data/processed/*
