@@ -48,3 +48,6 @@ data/processed/*
 !data/processed/.gitkeep
 data/errors/*
 !data/errors/.gitkeep
+
+# Log files
+logs/

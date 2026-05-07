@@ -6,6 +6,9 @@ prices and volume).
 """
 
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 EXPECTED_COLUMNS = ['ticker', 'trade_date', 'open', 'high', 'low', 'close', 'volume']
 NUMERIC_COLUMNS = ['open', 'high', 'low', 'close', 'volume']
@@ -22,13 +25,16 @@ def validate_schema(df: pd.DataFrame) -> pd.DataFrame:
     for col in NUMERIC_COLUMNS:
         df[col] = pd.to_numeric(df[col], errors='coerce')
     
+    logger.info("Validated schema")
     return df
 
 
 def split_valid_invalid(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Split a DataFrame into valid and invalid rows."""
+
     df = df.copy()
     df["reason"] = ""
+
     df.loc[df["volume"] < 0, "reason"] += "Negative volume; "
     df.loc[df["high"] < df["low"], "reason"] += "High less than low; "
     df.loc[df["high"] < df["open"], "reason"] += "High less than open; "
@@ -39,6 +45,9 @@ def split_valid_invalid(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     df.loc[(df[["open", "high", "low", "close", "volume"]] < 0).any(axis=1), "reason"] += "Negative price; "
     df.loc[df["ticker"].isna(), "reason"] += "Missing ticker; "
     df.loc[df["trade_date"].isna(), "reason"] += "Missing or invalid trade_date; "
+    
     valid_df = df[df["reason"] == ""].drop(columns="reason")
     invalid_df = df[df["reason"] != ""]
+
+    logger.info(f"Validated: {len(valid_df)} valid, {len(invalid_df)} invalid")
     return valid_df, invalid_df
