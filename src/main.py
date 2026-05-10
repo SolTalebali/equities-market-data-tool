@@ -11,6 +11,7 @@ from src.ingest import load_csv, load_config
 from src.validate import validate_schema, split_valid_invalid
 from src.transform import add_daily_return, add_moving_average, add_spread, add_volume_change
 from src.report import summarize, write_errors, write_processed
+from src.visualize import plot_close_with_moving_average
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,8 @@ def run() -> None:
     valid = add_moving_average(valid, window=config["moving_average_window"])
     valid = add_spread(valid)
     valid = add_volume_change(valid)
+
+    plot_close_with_moving_average(valid, config["output_path"] + "charts/", config["moving_average_window"])
 
     write_processed(valid, config["output_path"] + "processed.csv")
     write_errors(invalid, config["error_path"] + "errors.csv")
