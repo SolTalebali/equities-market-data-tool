@@ -54,6 +54,7 @@ moving_average_window: 5
 | Validate | `src/validate.py` | Enforce schema (required columns, type coercion) and split rows into valid / invalid based on business rules |
 | Transform | `src/transform.py` | Add derived columns (`daily_return`, `spread`, `volume_change`, `moving_average_<window>`) |
 | Report | `src/report.py` | Summarise per-ticker stats and write CSV outputs |
+| Visualise | `src/visualize.py` | Generate per-ticker close price + moving average charts as PNG files |
 | Orchestration | `src/main.py` | Wire the stages together end-to-end |
 
 ### Validation rules
@@ -115,6 +116,7 @@ equities-market-data-tool/
 - pandas — DataFrame manipulation, groupby, rolling windows
 - PyYAML — config loading
 - pytest — test framework
+- Matplotlib — per-ticker price charts
 
 ## Possible Extensions
 
@@ -122,6 +124,5 @@ Stretch ideas not implemented in the foundation version:
 
 - CLI arguments to override config values at runtime (e.g. `--config`, `--window`)
 - SQLite output as an alternative to CSV
-- Matplotlib visualisations of returns / moving averages
 - FastAPI endpoint exposing the pipeline as a service
 - Docker packaging for portable deployment
