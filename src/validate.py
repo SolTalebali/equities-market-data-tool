@@ -42,7 +42,7 @@ def split_valid_invalid(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     df.loc[df["low"] > df["open"], "reason"] += "Low greater than open; "
     df.loc[df["low"] > df["close"], "reason"] += "Low greater than close; " 
     df.loc[df[NUMERIC_COLUMNS].isna().any(axis=1), "reason"] += "Missing or non-numeric value; "
-    df.loc[(df[["open", "high", "low", "close", "volume"]] < 0).any(axis=1), "reason"] += "Negative price; "
+    df.loc[(df[["open", "high", "low", "close"]] < 0).any(axis=1), "reason"] += "Negative price; "
     df.loc[df["ticker"].isna(), "reason"] += "Missing ticker; "
     df.loc[df["trade_date"].isna(), "reason"] += "Missing or invalid trade_date; "
     
