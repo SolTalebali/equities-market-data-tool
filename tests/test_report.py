@@ -1,5 +1,3 @@
-"""Tests for the report module."""
-
 import pandas as pd
 from src.report import summarize, write_errors, write_processed
 
@@ -16,3 +14,4 @@ def test_summarize():
         assert col in df.columns
     assert len(df) == 2
     assert df['total_volume'].iloc[0] == 3000
+    assert df['mean_daily_return'].iloc[1] == 20

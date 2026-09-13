@@ -1,9 +1,3 @@
-"""Pipeline entry point.
-
-Wires together ingest, validate, transform, and report stages into a single
-end-to-end run driven by config.yaml.
-"""
-
 import logging
 from pathlib import Path
 
@@ -17,8 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 def run() -> None:
-    """Run the end-to-end pipeline."""
-
     config = load_config("config.yaml")
     log_path = Path(config["log_path"])
     log_path.parent.mkdir(parents=True, exist_ok=True)

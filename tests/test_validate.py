@@ -1,5 +1,3 @@
-"""Tests for the validate module."""
-
 import pandas as pd
 import pytest
 

@@ -1,5 +1,3 @@
-"""Tests for the transform module."""
-
 import pandas as pd
 import pytest
 from src.transform import add_spread, add_daily_return, add_moving_average, add_volume_change
