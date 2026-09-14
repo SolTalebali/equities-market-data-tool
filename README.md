@@ -27,10 +27,13 @@ Run the full pipeline:
 python -m src.main
 ```
 
+Run it from the project root, since paths in `config.yaml` are relative. Use the `-m` form: running `python src/main.py` directly fails with `ModuleNotFoundError: No module named 'src'`.
+
 This reads `config.yaml`, processes the input CSV, and writes:
 
 - `data/processed/processed.csv` — clean rows with all derived analytics
 - `data/processed/summary.csv` — per-ticker aggregate stats
+- `data/processed/charts/<TICKER>.png` — one close price + moving average chart per ticker
 - `data/errors/errors.csv` — rejected rows with a `reason` column explaining why each was excluded
 - `logs/pipeline.log` — timestamped log of pipeline events
 
@@ -45,6 +48,14 @@ error_path: data/errors/
 log_path: logs/pipeline.log
 moving_average_window: 5
 ```
+
+| Key | Description |
+|---|---|
+| `input_path` | Raw input CSV consumed by the ingest stage |
+| `output_path` | Directory for processed rows, the summary, and charts |
+| `error_path` | Directory for rejected rows |
+| `log_path` | Log file location; its parent directory is created if missing |
+| `moving_average_window` | Window size, in trading days, for the moving average |
 
 ## Pipeline Stages
 
@@ -70,6 +81,29 @@ Rows are rejected if any of the following hold:
 
 Each rejected row carries a `reason` column listing every rule it violated.
 
+### Derived columns
+
+Valid rows are sorted by `ticker` and `trade_date`, and every calculation that looks at previous rows is done per ticker.
+
+| Column | Definition |
+|---|---|
+| `daily_return` | `(close - previous close) / previous close`, as a fraction (`0.10` = 10%) |
+| `spread` | `high - low` |
+| `volume_change` | `(volume - previous volume) / previous volume`, as a fraction |
+| `moving_average_<window>` | Rolling mean of `close` over the last `<window>` rows |
+
+`daily_return` and `volume_change` are empty on each ticker's first row. `moving_average_<window>` is empty on each ticker's first `<window> - 1` rows.
+
+### Summary columns
+
+`summary.csv` has one row per ticker:
+
+| Column | Definition |
+|---|---|
+| `mean_daily_return` | Mean of `daily_return` |
+| `mean_spread` | Mean of `spread` |
+| `total_volume` | Sum of `volume` |
+
 ## Testing
 
 Run the test suite with pytest:
@@ -78,7 +112,13 @@ Run the test suite with pytest:
 pytest
 ```
 
-Tests live under `tests/`, one file per source module. They construct small DataFrames in-memory rather than depending on the sample CSV, so they're isolated and fast.
+Tests live under `tests/`, one file per source module. They build small DataFrames in memory, or write temporary files with pytest's `tmp_path`, rather than depending on the sample CSV or `config.yaml`, so they're isolated and fast.
+
+Run a single test with:
+
+```bash
+pytest tests/test_ingest.py::test_load_config
+```
 
 ## Project Structure
 
@@ -86,7 +126,7 @@ Tests live under `tests/`, one file per source module. They construct small Data
 equities-market-data-tool/
 ├── data/
 │   ├── raw/           # Source CSVs
-│   ├── processed/     # Cleaned + transformed output (gitignored)
+│   ├── processed/     # Cleaned + transformed output and charts/ (gitignored)
 │   └── errors/        # Rejected rows (gitignored)
 ├── logs/              # Pipeline logs (gitignored)
 ├── src/
@@ -95,6 +135,7 @@ equities-market-data-tool/
 │   ├── validate.py
 │   ├── transform.py
 │   ├── report.py
+│   ├── visualize.py
 │   └── main.py
 ├── tests/
 │   ├── __init__.py
